@@ -170,7 +170,7 @@ const Overlay = React.memo(
         </div>
     )
 );
-
+Overlay.displayName = "Overlay";
 const GameGrid = React.memo(
     ({snake, food, size, direction}: { snake: Point[]; food: Point; size: number, direction: Direction }) => {
         const snakeSet = useMemo(
@@ -205,6 +205,7 @@ const GameGrid = React.memo(
         );
     }
 );
+GameGrid.displayName = "GameGrid";
 
 export const SnakeGrid = () => {
 
