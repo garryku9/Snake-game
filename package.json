@@ -19,7 +19,7 @@
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.14",
     "viem": "2.29.2",
-    "wagmi": "^2.15.6"
+    "wagmi": "^2.18.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.8",
