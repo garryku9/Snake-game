@@ -1,6 +1,6 @@
 import { getDefaultConfig } from '@rainbow-me/rainbowkit';
 import {
- monadTestnet,sepolia
+ monadTestnet
 } from 'wagmi/chains';
 import {publicActions} from "viem";
 
