@@ -17,10 +17,6 @@ const Home: NextPage = () => {
         <link href="/favicon.ico" rel="icon" />
       </Head>
       <main className="bg-gradient-to-br flex flex-col w-full items-center from-slate-900 to-slate-800 h-screen">
-
-
-
-
           <ConnectButton/>
 
 
