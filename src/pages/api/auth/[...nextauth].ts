@@ -29,28 +29,46 @@ export function getAuthOptions(req: IncomingMessage): NextAuthOptions {
                             message: siweMessage,
                         })
                     ) {
+                        console.log("❌ SIWE message validation failed");
                         return null;
                     }
+
+                    // Debug: Log environment variables
+                    console.log("🔍 Environment Check:");
+                    console.log("  NEXTAUTH_URL:", process.env.NEXTAUTH_URL);
+                    console.log("  VERCEL_URL:", process.env.VERCEL_URL);
+                    console.log("  NODE_ENV:", process.env.NODE_ENV);
 
                     const nextAuthUrl =
                         process.env.NEXTAUTH_URL ||
                         (process.env.VERCEL_URL
                             ? `https://${process.env.VERCEL_URL}`
                             : null);
+
+                    console.log("  Computed nextAuthUrl:", nextAuthUrl);
+
                     if (!nextAuthUrl) {
+                        console.log("❌ No NEXTAUTH_URL or VERCEL_URL found");
                         return null;
                     }
 
-                    console.log(nextAuthUrl);
                     const nextAuthHost = new URL(nextAuthUrl).host;
+                    console.log("  nextAuthHost:", nextAuthHost);
+                    console.log("  siweMessage.domain:", siweMessage.domain);
+
                     if (siweMessage.domain !== nextAuthHost) {
+                        console.log("❌ Domain mismatch!");
+                        console.log(`  Expected: ${nextAuthHost}`);
+                        console.log(`  Got: ${siweMessage.domain}`);
                         return null;
                     }
 
-                    if (
-                        siweMessage.nonce !==
-                        (await getCsrfToken({ req: { headers: req.headers } }))
-                    ) {
+                    const csrfToken = await getCsrfToken({ req: { headers: req.headers } });
+                    console.log("  CSRF Token:", csrfToken?.substring(0, 10) + "...");
+                    console.log("  SIWE Nonce:", siweMessage.nonce?.substring(0, 10) + "...");
+
+                    if (siweMessage.nonce !== csrfToken) {
+                        console.log("❌ Nonce mismatch!");
                         return null;
                     }
 
@@ -111,7 +129,6 @@ export function getAuthOptions(req: IncomingMessage): NextAuthOptions {
                 return session;
             },
         },
-        // https://next-auth.js.org/configuration/providers/oauth
         providers,
         secret: process.env.NEXTAUTH_SECRET,
         session: {
@@ -120,9 +137,10 @@ export function getAuthOptions(req: IncomingMessage): NextAuthOptions {
     };
 }
 
-// For more information on each option (and a full list of options) go to
-// https://next-auth.js.org/configuration/options
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
+    // Debug: Log when auth endpoint is hit
+    console.log("🚀 Auth endpoint called:", req.method, req.query.nextauth);
+
     const authOptions = getAuthOptions(req);
 
     if (!Array.isArray(req.query.nextauth)) {
@@ -134,7 +152,6 @@ export default async function auth(req: NextApiRequest, res: NextApiResponse) {
         req.method === "GET" &&
         req.query.nextauth.find((value) => value === "signin");
 
-    // Hide Sign-In with Ethereum from default sign page
     if (isDefaultSigninPage) {
         authOptions.providers.pop();
     }
